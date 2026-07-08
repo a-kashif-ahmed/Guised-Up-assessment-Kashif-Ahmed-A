@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
   TextInput,
@@ -27,71 +28,171 @@ export default function CreatePostScreen({ navigation }: Props) {
 
     try {
       setLoading(true);
+
       await createPost(textContent, imageUrl || null);
-      Alert.alert('Success', 'Post created successfully.');
+
+      Alert.alert('Success', 'Your post has been published.');
+
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error?.response?.data?.message || 'Unable to create post.');
+      Alert.alert(
+        'Error',
+        error?.response?.data?.message ?? 'Unable to create post.'
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Create New Post</Text>
-
-      <TextInput
-        style={styles.textArea}
-        multiline
-        numberOfLines={6}
-        placeholder="What's on your mind?"
-        value={textContent}
-        onChangeText={setTextContent}
-        textAlignVertical="top"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Image URL (optional)"
-        value={imageUrl}
-        onChangeText={setImageUrl}
-        autoCapitalize="none"
-      />
-
-      <TouchableOpacity
-        style={[styles.button, loading && styles.disabled]}
-        onPress={handleCreatePost}
-        disabled={loading}
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.buttonText}>{loading ? 'Posting...' : 'Create Post'}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={styles.heading}>Create Post</Text>
+
+        <Text style={styles.subtitle}>
+          Share your thoughts with the community.
+        </Text>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Post</Text>
+
+          <TextInput
+            style={styles.textArea}
+            multiline
+            numberOfLines={7}
+            placeholder="What's on your mind?"
+            placeholderTextColor="#9CA3AF"
+            textAlignVertical="top"
+            value={textContent}
+            onChangeText={setTextContent}
+          />
+
+          <Text style={styles.label}>Image URL</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="https://example.com/image.jpg"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="none"
+            value={imageUrl}
+            onChangeText={setImageUrl}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+              loading && styles.buttonDisabled,
+            ]}
+            disabled={loading}
+            onPress={handleCreatePost}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? 'Publishing...' : 'Publish Post'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5' },
-  content: { padding: 20 },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 25 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F7FA',
+  },
+
+  content: {
+    padding: 24,
+    paddingBottom: 50,
+  },
+
+  heading: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#111827',
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginTop: 8,
+    marginBottom: 28,
+    lineHeight: 22,
+  },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 22,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    elevation: 3,
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 10,
+  },
+
   textArea: {
-    backgroundColor: '#fff',
+    minHeight: 180,
+    borderRadius: 16,
+    backgroundColor: '#F9FAFB',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 15,
-    height: 180,
-    marginBottom: 20,
+    borderColor: '#E5E7EB',
+    padding: 16,
+    fontSize: 16,
+    color: '#111827',
+    marginBottom: 22,
   },
+
   input: {
-    backgroundColor: '#fff',
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#F9FAFB',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: '#111827',
+    marginBottom: 28,
   },
-  button: { backgroundColor: '#1976D2', padding: 16, borderRadius: 10, alignItems: 'center' },
-  disabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+
+  button: {
+    height: 56,
+    backgroundColor: '#111827',
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    shadowColor: '#111827',
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    elevation: 5,
+  },
+
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+  },
 });

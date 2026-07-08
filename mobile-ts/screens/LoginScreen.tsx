@@ -6,6 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/AppNavigator';
@@ -20,16 +24,13 @@ export default function LoginScreen({ navigation }: Props) {
 
   async function handleLogin() {
     if (!email || !password) {
-      Alert.alert('Error', 'Email and password are required.');
+      Alert.alert('Missing Information', 'Please enter your email and password.');
       return;
     }
 
     try {
       setLoading(true);
       await login(email, password);
-      // useAuth's effect will pick up the new token on next mount/refresh
-      // of the navigator; if you want an instant switch, lift auth state
-      // up and call a refetch here instead.
     } catch (error: any) {
       Alert.alert(
         'Login Failed',
@@ -41,74 +42,180 @@ export default function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={loading}
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
-      </TouchableOpacity>
+        <Text style={styles.logo}>Guised</Text>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-        <Text style={styles.link}>Don't have an account? Register</Text>
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.heading}>
+          Welcome Back
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Sign in to continue discovering people around you.
+        </Text>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Email</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="you@example.com"
+            placeholderTextColor="#9CA3AF"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <Text style={styles.label}>Password</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="••••••••"
+            placeholderTextColor="#9CA3AF"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+              loading && styles.buttonDisabled,
+            ]}
+            disabled={loading}
+            onPress={handleLogin}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>
+                Sign In
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={styles.footer}>
+            Don't have an account?
+            <Text style={styles.footerLink}> Create one</Text>
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    backgroundColor: '#F4F6F8',
+  },
+
+  container: {
+    flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#fff',
+    paddingHorizontal: 28,
+    paddingVertical: 40,
   },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
+
+  logo: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 10,
     textAlign: 'center',
-    marginBottom: 40,
+    letterSpacing: 0.4,
   },
+
+  heading: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 36,
+    lineHeight: 22,
+  },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 22,
+
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+
+    elevation: 6,
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+    marginTop: 8,
+  },
+
   input: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: '#111827',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 15,
+    borderColor: '#E5E7EB',
+    marginBottom: 12,
   },
+
   button: {
-    backgroundColor: '#1976D2',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: '#111827',
+    borderRadius: 14,
+    paddingVertical: 18,
+    marginTop: 18,
+    alignItems: 'center',
   },
+
+  buttonDisabled: {
+    opacity: 0.65,
+  },
+
   buttonText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
-  link: {
-    marginTop: 20,
+
+  footer: {
     textAlign: 'center',
-    color: '#1E88E5',
+    color: '#6B7280',
+    marginTop: 30,
+    fontSize: 15,
+  },
+
+  footerLink: {
+    color: '#111827',
+    fontWeight: '700',
   },
 });

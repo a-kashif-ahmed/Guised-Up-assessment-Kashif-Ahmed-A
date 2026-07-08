@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
   TextInput,
@@ -33,12 +34,14 @@ export default function RegisterScreen({ navigation }: Props) {
 
     try {
       setLoading(true);
+
       await register({
         name,
         email,
         password,
         password_confirmation: confirmPassword,
       });
+
       Alert.alert('Success', 'Registration successful.');
       navigation.goBack();
     } catch (error: any) {
@@ -52,80 +55,155 @@ export default function RegisterScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.card}>
 
-      <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+        <Text style={styles.title}>
+          Create Account
+        </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
+        <Text style={styles.subtitle}>
+          Join Guised and start sharing with the community.
+        </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Full name"
+          placeholderTextColor="#9CA3AF"
+          value={name}
+          onChangeText={setName}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        secureTextEntry
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Email address"
+          placeholderTextColor="#9CA3AF"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Creating...' : 'Register'}</Text>
-      </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#9CA3AF"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text style={styles.link}>Already have an account? Login</Text>
-      </TouchableOpacity>
-    </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm password"
+          placeholderTextColor="#9CA3AF"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Creating Account...' : 'Create Account'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.link}>
+            Already have an account? Sign In
+          </Text>
+        </TouchableOpacity>
+
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: '#F5F7FB',
     padding: 24,
-    backgroundColor: '#fff',
   },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    padding: 28,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    elevation: 8,
+  },
+
   title: {
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#111827',
     textAlign: 'center',
-    marginBottom: 40,
   },
+
+  subtitle: {
+    marginTop: 10,
+    marginBottom: 30,
+    textAlign: 'center',
+    color: '#6B7280',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+
   input: {
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 15,
+    borderColor: '#E5E7EB',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    fontSize: 16,
+    color: '#111827',
+    marginBottom: 16,
   },
+
   button: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: '#111827',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#111827',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    elevation: 6,
   },
+
   buttonText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
   },
+
   link: {
-    marginTop: 20,
+    marginTop: 24,
     textAlign: 'center',
-    color: '#1E88E5',
+    color: '#111827',
+    fontWeight: '600',
+    fontSize: 15,
   },
+
 });

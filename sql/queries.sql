@@ -1,7 +1,6 @@
--- =========================================================
--- D1: Top 10 most active users in the last 7 days,
---     ranked by total interactions (views + replies + reactions)
--- =========================================================
+
+-- D1: Top 10 most active users in the last 7 days, ranked by total interactions (views + replies + reactions)
+
 SELECT
     u.id AS user_id,
     u.name,
@@ -15,11 +14,9 @@ ORDER BY total_interactions DESC
 LIMIT 10;
 
 
--- =========================================================
--- D2: For a given user_id, return all posts from users they
---     interact with most, ordered by interaction frequency
---     descending, limited to posts from the last 30 days.
--- =========================================================
+
+-- D2: For a given user_id, return all posts from users they  interact with most, ordered by interaction frequency descending, limited to posts from the last 30 days.
+
 WITH interaction_counts AS (
     SELECT
         i.post_id,
@@ -45,10 +42,8 @@ WHERE p.created_at >= NOW() - INTERVAL '30 days'
 ORDER BY ra.author_interaction_count DESC, p.created_at DESC;
 
 
--- =========================================================
--- D3: Posts viewed more than 100 times but with zero reactions.
---     Return post_id, author_id, view_count, created_at.
--- =========================================================
+-- D3: Posts viewed more than 100 times but with zero reactions. Return post_id, author_id, view_count, created_at.
+
 SELECT
     p.id AS post_id,
     p.user_id AS author_id,
@@ -62,10 +57,8 @@ HAVING
     AND COUNT(*) FILTER (WHERE i.type = 'reaction') = 0;
 
 
--- =========================================================
--- D4: Detect potential spam — users who created more than 20
---     posts in the last 24 hours. Return email and post count.
--- =========================================================
+--- D4: Detect potential spam — users who created more than 20 posts in the last 24 hours. Return email and post count.
+
 SELECT
     u.email,
     COUNT(p.id) AS post_count
