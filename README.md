@@ -1,62 +1,82 @@
 # Guised Up — Real Connections Feed (Take-Home Assessment)
 
-Full technical reasoning lives in [`/docs/TSD.md`](./docs/TSD.md). This README covers setup.
+A social feed that ranks posts by authenticity and real relationships instead of likes and shares, with natural-language search powered by AI embeddings.
 
-## Structure
+Full write-up of the design decisions is in [`TSD.md`](./TSD.md). This README just covers how to run everything.
+
+## What's in this repo
 
 ```
-/docs/TSD.md              — Technical Solution Document
-/sql/queries.sql           — D1–D4 SQL queries
-/backend/                  — Laravel app pieces (migrations, models, controllers, routes, tests)
-/embedding-service/         — Python Flask microservice (mocked embeddings)
-/mobile/                   — React Native Feed Screen
+TSD.md               — Technical Solution Document (architecture, schema, ranking logic)
+sql/queries.sql        — Required SQL queries (D1–D4)
+backend/               — Laravel API (migrations, models, controllers, routes, tests)
+embedding-service/      — Python service that turns text into AI embeddings
+mobile-ts/              — React Native app (Expo, TypeScript)
 ```
 
-## Setup
+## How to run it
 
-### 1. Database
-Requires PostgreSQL with the `pgvector` extension available.
+### 1. Database — PostgreSQL with pgvector
+
+Easiest way on any OS (avoids compiling anything) is Docker:
 ```bash
-createdb guisedup
-# migrations enable the extension automatically on first run
-php artisan migrate
+docker run --name guisedup-pg -e POSTGRES_PASSWORD=yourpassword -e POSTGRES_DB=guisedup -p 5432:5432 -d pgvector/pgvector:pg16
 ```
 
 ### 2. Laravel backend
 ```bash
+cd backend
 composer install
 cp .env.example .env
+```
+Edit `.env` and set:
+```
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=guisedup
+DB_USERNAME=postgres
+DB_PASSWORD=yourpassword
+SESSION_DRIVER=database
+```
+Then:
+```bash
 php artisan key:generate
-php artisan migrate --seed   # seeds 2 test users
+php artisan migrate
 php artisan serve
 ```
 
 ### 3. Embedding service (Python)
 ```bash
 cd embedding-service
-pip install flask
+pip install flask sentence-transformers
 python app.py   # runs on http://localhost:5001
 ```
+The first run downloads the AI model (`all-MiniLM-L6-v2`) automatically — this only happens once.
 
-### 4. Mobile app
+### 4. Mobile app (Expo + TypeScript)
 ```bash
-cd mobile
+cd mobile-ts
 npm install
-npx react-native run-ios   # or run-android
+npx expo start
 ```
-Set `API_BASE_URL` in your environment to point at the running Laravel instance.
+Update the API URL in `constants.ts` to match how you're running the backend:
+- Android emulator → `http://10.0.2.2:8000/api`
+- iOS simulator → `http://localhost:8000/api`
+- Physical device → your computer's LAN IP, e.g. `http://192.168.1.23:8000/api`
 
 ### 5. Tests
 ```bash
+cd backend
 php artisan test
 ```
 
-## What's mocked / simplified (and why)
+## Honest notes on what's simplified
 
-- **Embeddings**: hash-based deterministic mock instead of a real model, to avoid needing API credits or heavy local downloads under the time limit. Swap is a single function — see `embedding-service/app.py` and TSD Section 4.
-- **Authenticity score**: simple heuristic (text length + image presence), not an ML classifier — documented as a known simplification in the TSD.
-- **Vector DB**: pgvector (extension inside the same Postgres instance) rather than a separate managed service — reasoning in TSD Section 3.
+- **Authenticity scoring** is a simple starting heuristic (e.g. text length), not a trained model. Documented in TSD Section 9.
+- **Ranking weights** are sensible defaults, not yet tuned against real usage data.
+- Everything else — the embeddings, the database, the ranking logic — is real and working, not mocked.
 
 ## AI tools used
 
-Claude was used throughout: architecture/ranking-algorithm design discussion, TSD drafting, and scaffolding the Laravel/Python/SQL boilerplate so implementation time could focus on the ranking logic and schema design rather than repetitive setup.
+Both Claude and ChatGPT were used throughout — for architecture discussion, writing boilerplate faster, and debugging real issues hit while actually running the project (missing config files, a corrupted screen component, unregistered API routes, a missing database table, and a missing native dependency for animations). Details are in TSD Section 8.
