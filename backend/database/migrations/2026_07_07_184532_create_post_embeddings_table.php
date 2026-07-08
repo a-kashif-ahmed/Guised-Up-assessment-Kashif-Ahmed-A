@@ -1,28 +1,30 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('post_embeddings', function (Blueprint $table) {
+        DB::statement('CREATE EXTENSION IF NOT EXISTS vector');
 
-            $table->foreignId('post_id')
-                ->primary()
-                ->constrained()
-                ->cascadeOnDelete();
+        DB::statement('
+            CREATE TABLE post_embeddings (
+                post_id BIGINT PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+                embedding vector(384) NOT NULL
+            )
+        ');
 
-            // JSON instead of pgvector
-            $table->json('embedding');
-
-        });
+        DB::statement('
+            CREATE INDEX idx_embeddings_vector
+            ON post_embeddings
+            USING ivfflat (embedding vector_cosine_ops)
+        ');
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('post_embeddings');
+        DB::statement('DROP TABLE IF EXISTS post_embeddings');
     }
 };

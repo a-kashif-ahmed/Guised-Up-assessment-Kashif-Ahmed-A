@@ -2,65 +2,33 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PostEmbedding extends Model
 {
-    use HasFactory;
-
     protected $table = 'post_embeddings';
-
     public $timestamps = false;
-
     protected $primaryKey = 'post_id';
-
     public $incrementing = false;
-
-    protected $fillable = [
-
-        'post_id',
-
-        'embedding'
-
-    ];
-
-    protected function casts(): array
-    {
-        return [
-
-            'embedding' => 'string'
-
-        ];
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
+    protected $fillable = ['post_id', 'embedding'];
 
     public function post()
     {
         return $this->belongsTo(Post::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Helpers
-    |--------------------------------------------------------------------------
-    */
-
-    public function getVectorAttribute(): array
+    /**
+     * Insert or replace a post's embedding using pgvector's native type.
+     * Eloquent has no vector cast, so this goes through raw SQL.
+     */
+    public static function upsertVector(int $postId, array $vector): void
     {
-        return json_decode(
-            $this->embedding,
-            true
-        ) ?? [];
-    }
+        $vectorLiteral = '[' . implode(',', $vector) . ']';
 
-    public function setVectorAttribute(array $vector): void
-    {
-        $this->attributes['embedding'] = json_encode($vector);
+        \DB::statement('
+            INSERT INTO post_embeddings (post_id, embedding)
+            VALUES (?, ?::vector)
+            ON CONFLICT (post_id) DO UPDATE SET embedding = EXCLUDED.embedding
+        ', [$postId, $vectorLiteral]);
     }
 }

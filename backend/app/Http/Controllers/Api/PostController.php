@@ -66,16 +66,7 @@ class PostController extends Controller
         }
 
         if (!empty($embedding)) {
-
-            PostEmbedding::create([
-
-                'post_id' => $post->id,
-
-                // JSON instead of pgvector
-                'embedding' => json_encode($embedding)
-
-            ]);
-
+            PostEmbedding::upsertVector($post->id, $embedding);
         }
 
         return response()->json([
