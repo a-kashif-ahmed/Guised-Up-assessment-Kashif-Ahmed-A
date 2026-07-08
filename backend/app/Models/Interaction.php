@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Interaction extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+
+        'user_id',
+
+        'post_id',
+
+        'type'
+
+    ];
+
+    protected function casts(): array
+    {
+        return [
+
+            'created_at' => 'datetime',
+
+            'updated_at' => 'datetime'
+
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function post()
+    {
+        return $this->belongsTo(Post::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeViews($query)
+    {
+        return $query->where('type', 'view');
+    }
+
+    public function scopeReplies($query)
+    {
+        return $query->where('type', 'reply');
+    }
+
+    public function scopeReactions($query)
+    {
+        return $query->where('type', 'reaction');
+    }
+}   
